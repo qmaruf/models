@@ -132,7 +132,7 @@ def main(unused_argv):
     graph_rewriter_fn = graph_rewriter_builder.build(
         configs['graph_rewriter_config'], is_training=False)
 
-  evaluator.evaluate(
+  result = evaluator.evaluate(
       create_input_dict_fn,
       model_fn,
       eval_config,
@@ -140,6 +140,20 @@ def main(unused_argv):
       FLAGS.checkpoint_dir,
       FLAGS.eval_dir,
       graph_hook_fn=graph_rewriter_fn)
+
+  def get_name(_id, categories):
+    for category in categories:
+      if int(category['id']) == _id:
+      return category['name']
+
+  fp = open(FLAGS.pipeline_config_path+'_precision_recall_.txt', 'w')
+  for class_id in range(3):
+    precisions = ','.join(map(str, res['PascalBoxes_PrecisionsPerClass/mAP@0.5IOU'][class_id]))
+    recalls = ','.join(map(str, res['PascalBoxes_RecallsPerClass/mAP@0.5IOU'][class_id]))
+    class_id_name = get_name(class_id + 1, categories)
+    report = '%s %s %s\n'%(class_id_name, precisions, recalls)
+    fp.write(report)
+  fp.close()
 
 
 if __name__ == '__main__':

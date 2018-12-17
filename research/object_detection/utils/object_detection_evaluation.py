@@ -271,12 +271,19 @@ class ObjectDetectionEvaluator(DetectionEvaluator):
       2. per_category_ap: category specific results with keys of the form
         'PerformanceByCategory/mAP@<matching_iou_threshold>IOU/category'.
     """
-    (per_class_ap, mean_ap, _, _, per_class_corloc, mean_corloc) = (
-        self._evaluation.evaluate())
+    (per_class_ap, mean_ap, precisions_per_class, recalls_per_class, per_class_corloc, mean_corloc) = (
+        self._evaluation.evaluate())    
     pascal_metrics = {
         self._metric_prefix +
         'Precision/mAP@{}IOU'.format(self._matching_iou_threshold):
-            mean_ap
+            mean_ap,
+        self._metric_prefix +
+        'PrecisionsPerClass/mAP@{}IOU'.format(self._matching_iou_threshold):
+            precisions_per_class,
+        self._metric_prefix +
+        'RecallsPerClass/mAP@{}IOU'.format(self._matching_iou_threshold):
+            recalls_per_class
+
     }
     if self._evaluate_corlocs:
       pascal_metrics[self._metric_prefix + 'Precision/meanCorLoc@{}IOU'.format(
